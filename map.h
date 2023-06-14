@@ -3,20 +3,19 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef uint64_t map_hash_fn (void const *, uint64_t);
-typedef bool     map_equal_fn(void const *, void const *);
-
-struct map {
+typedef struct {
     void *slots, *item, *swap;
-    size_t cap, count, stride;
-    map_hash_fn *hash;
-    map_equal_fn *equal;
+    uint64_t (*hash)(void const *, size_t, uint64_t);
+    bool (*equal)(void const *, void const *);
+    size_t cap, count, stride, key_stride, val_stride;
     uint64_t seed;
-    bool oom;
-};
+} Map;
 
-struct map  *map_new  (size_t stride, size_t cap, uint64_t seed, map_hash_fn *hash, map_equal_fn *equal);
-bool         map_set  (struct map *m, void const *data);
-void        *map_get  (struct map *m, void const *data);
-bool         map_rem  (struct map *m, void const *data);
-void         map_free (struct map *m);
+#define MAP(K, V, HASH, EQUAL, CAP, SEED)\
+    (Map){.key_stride = sizeof (K), .val_stride = sizeof (V), .hash = (HASH), .equal = (EQUAL), .cap = (CAP), .seed = (SEED)}
+
+bool  map_init (Map *m);
+bool  map_set  (Map *m, void const *key, void const *val);
+void *map_get  (Map *m, void const *key);
+bool  map_rem  (Map *m, void const *key);
+void  map_free (Map *m);
