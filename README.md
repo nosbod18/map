@@ -32,7 +32,7 @@ int main(void) {
 
     map_rem(&m, &key);
     get = map_get(&m, &key);
-    printf("Hell = %s\n", get ? *get : "<null>");
+    printf("Hello = %s\n", get ? *get : "<null>");
 
     map_free(&m);
 }
